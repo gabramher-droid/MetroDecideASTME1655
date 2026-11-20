@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetroDecide · verificación de tabletas por NIR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#FCEDF3; --tarjeta:#FFFFFF; --tinta:#1F191C; --tinta2:#574A51; --tinta3:#7D6E75;
+  --linea:#EFD6E2; --linea2:#F7E8EF;
+  --rosa:#B3123F; --rosa-pal:#FBE3EC; --rosa-mid:#F2B8CE;
+  --rail-fondo:#F7DCE8; --ciruela:#1F191C; --ciruela2:#3E2F36;
+  --verde:#0E8F6F; --verde-pal:#DCF2EB;
+  --ocre:#B07415; --ocre-pal:#FBEEDA;
+  --azul:#2457C5;
+  --rail:210px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--papel); color:var(--tinta);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55; font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0; font-weight:600; letter-spacing:-0.015em; line-height:1.2}
+p{margin:0 0 .7em}
+a{color:var(--rosa)}
+:focus-visible{outline:2.5px solid var(--rosa); outline-offset:2px; border-radius:3px}
+
+/* ───────────────────────── chasis ───────────────────────── */
+.chasis{display:flex; min-height:100vh; align-items:stretch}
+.rail{
+  width:var(--rail); flex:0 0 var(--rail); background:var(--rail-fondo); color:var(--tinta);
+  padding:22px 18px 18px; display:flex; flex-direction:column; gap:26px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-right:1px solid #EBC8DA;
+}
+.marca{font-size:19px; font-weight:700; letter-spacing:-0.02em; color:var(--tinta)}
+.marca span{display:block; font-size:12.5px; font-weight:400; color:var(--tinta2); letter-spacing:0; margin-top:3px; line-height:1.35}
+.rail nav{display:flex; flex-direction:column; gap:2px}
+.rail nav a{
+  display:block; padding:8px 11px; border-radius:7px; color:var(--tinta); text-decoration:none;
+  font-size:14.5px; font-weight:500;
+}
+.rail nav a:hover{background:rgba(255,255,255,.6)}
+.rail nav a[aria-current="page"]{background:#fff; font-weight:600; box-shadow:inset 3px 0 0 var(--rosa)}
+.grupo{display:flex; flex-direction:column; gap:7px}
+.grupo > b{font-size:11.5px; font-weight:600; color:var(--tinta2); letter-spacing:.02em}
+.seg{display:flex; background:rgba(255,255,255,.55); border-radius:8px; padding:3px; gap:3px}
+.seg button{
+  flex:1; border:0; background:transparent; color:var(--tinta2); font:inherit; font-size:13.5px;
+  font-weight:500; padding:6px 4px; border-radius:6px; cursor:pointer;
+}
+.seg button[aria-pressed="true"]{background:#fff; color:var(--tinta); font-weight:600; box-shadow:0 0 0 1px #E8C3D6}
+.pila{display:flex; flex-direction:column; gap:3px}
+.pila button{
+  border:0; background:rgba(255,255,255,.55); color:var(--tinta2); font:inherit; font-size:13.5px;
+  text-align:left; padding:7px 10px; border-radius:7px; cursor:pointer;
+}
+.pila button[aria-pressed="true"]{background:#fff; color:var(--tinta); font-weight:600; box-shadow:0 0 0 1px #E8C3D6}
+.rail footer{margin-top:auto; font-size:11.5px; color:var(--tinta2); line-height:1.45}
+.rail footer button{
+  display:block; width:100%; border:1px solid #DFAEC6;
+  background:transparent; color:var(--tinta); font:inherit; font-size:12.5px; padding:7px;
+  border-radius:7px; cursor:pointer;
+}
+.rail footer button:hover{background:rgba(255,255,255,.7)}
+.rail footer #pie-modelo:not(:empty){display:block; margin-bottom:8px}
+
+main{flex:1; min-width:0; padding:26px 30px 70px; max-width:1120px}
+.pantalla[hidden]{display:none}
+
+/* ───────────────────────── piezas ───────────────────────── */
+.cabecera{display:flex; flex-wrap:wrap; gap:10px 22px; align-items:baseline; margin-bottom:18px}
+.cabecera h1{font-size:25px}
+.cabecera .sub{color:var(--tinta2); font-size:14px}
+.tarjeta{background:var(--tarjeta); border:1px solid var(--linea); border-radius:12px; padding:20px 22px}
+.tarjeta + .tarjeta{margin-top:14px}
+.hint{color:var(--tinta2); font-size:13.5px}
+.num{font-variant-numeric:tabular-nums}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; background:var(--rosa-pal); padding:1px 5px; border-radius:4px; color:var(--ciruela2)}
+
+.selectores{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:16px}
+label.campo{display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--tinta2); font-weight:500}
+label.campo select, label.campo input[type=text]{
+  font:inherit; font-size:14.5px; padding:8px 10px; border:1px solid var(--linea);
+  border-radius:8px; background:#fff; color:var(--tinta); min-width:260px; max-width:100%;
+}
+label.campo{max-width:100%}
+.btn{
+  font:inherit; font-size:14px; font-weight:500; padding:9px 15px; border-radius:8px;
+  border:1px solid var(--rosa); background:#fff; color:var(--rosa); cursor:pointer;
+}
+.btn:hover{background:var(--rosa-pal)}
+.btn.primario{background:var(--rosa); color:#fff}
+.btn.primario:hover{background:#96102f}
+
+/* resultado */
+.resultado{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:26px; align-items:start}
+.lectura .mg{font-size:58px; font-weight:600; letter-spacing:-0.035em; line-height:.95}
+.lectura .mg small{font-size:22px; font-weight:500; letter-spacing:-0.01em; margin-left:4px; color:var(--tinta2)}
+.lectura .inc{font-size:15px; color:var(--tinta2); margin-top:7px}
+.placa{
+  border-radius:10px; padding:13px 20px; text-align:center; min-width:208px;
+  border:1.5px solid currentColor;
+}
+.placa .v{font-size:21px; font-weight:700; letter-spacing:-0.01em; display:block}
+.placa .q{font-size:12.5px; font-weight:500; margin-top:3px; display:block; opacity:.85}
+.v-CONFORME{color:var(--verde); background:var(--verde-pal)}
+.v-NOCONFORME{color:var(--rosa); background:var(--rosa-pal)}
+.v-NOEVALUABLE{color:var(--ocre); background:var(--ocre-pal)}
+
+.regla-pie{
+  margin-top:16px; padding-top:14px; border-top:1px solid var(--linea2);
+  display:flex; flex-wrap:wrap; gap:4px 26px; font-size:13px; color:var(--tinta2);
+}
+.regla-pie b{color:var(--tinta); font-weight:600}
+
+/* dominio espectral */
+.enc-dominio{display:flex; flex-wrap:wrap; gap:4px 16px; align-items:baseline; margin-bottom:16px}
+.enc-dominio h2{font-size:17px}
+.estado-dominio{font-size:14px; font-weight:600}
+.medidor{margin:0 0 15px}
+.medidor:last-child{margin-bottom:0}
+.medidor .fila{display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:13.5px; margin-bottom:5px}
+.medidor .fila b{font-weight:600}
+.medidor .numeral{color:var(--tinta3); font-size:12px}
+.barra{height:12px; border-radius:6px; background:var(--linea2); position:relative; overflow:hidden}
+.barra i{position:absolute; inset:0 auto 0 0; border-radius:6px; display:block}
+.barra u{position:absolute; top:-3px; bottom:-3px; width:2.5px; background:var(--tinta); border-radius:2px}
+.leyenda-med{font-size:12.5px; color:var(--tinta3); margin-top:5px}
+
+/* tablas */
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th,td{text-align:left; padding:8px 11px; border-bottom:1px solid var(--linea2); vertical-align:top}
+th{font-weight:600; font-size:12.5px; color:var(--tinta2); border-bottom:1.5px solid var(--linea)}
+tbody tr:hover{background:var(--rosa-pal)}
+td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
+table.norma td:first-child, table.norma td:nth-child(2){white-space:nowrap}
+.chip{display:inline-block; padding:1.5px 9px; border-radius:20px; font-size:12px; font-weight:600}
+.chip-SI{background:var(--verde-pal); color:var(--verde)}
+.chip-NO{background:var(--rosa-pal); color:var(--rosa)}
+.chip-INFORMATIVO{background:var(--ocre-pal); color:var(--ocre)}
+.envoltura-tabla{overflow-x:auto; margin:0 -6px; padding:0 6px}
+
+/* estadísticas */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); gap:8px; margin:14px 0 0}
+.stats div{background:#fff; border:1px solid var(--linea); border-radius:9px; padding:12px 14px}
+.stats dt{font-size:12px; color:var(--tinta2); font-weight:500; margin-bottom:3px}
+.stats dd{margin:0; font-size:21px; font-weight:600; letter-spacing:-0.02em}
+.stats dd small{font-size:13px; font-weight:500; color:var(--tinta2); letter-spacing:0}
+
+.aviso{
+  border-left:3px solid var(--rosa); background:var(--rosa-pal); padding:13px 16px;
+  border-radius:0 8px 8px 0; font-size:14px; margin:14px 0;
+}
+.aviso b{font-weight:600}
+.aviso.ocre{border-color:var(--ocre); background:var(--ocre-pal)}
+
+/* gráficos */
+.grafico{position:relative}
+.grafico svg{display:block; width:100%; height:auto; overflow:visible}
+.grafico .tip{
+  position:absolute; pointer-events:none; background:var(--ciruela); color:#fff;
+  font-size:12px; padding:5px 9px; border-radius:6px; white-space:nowrap; opacity:0;
+  transform:translate(-50%,-128%); transition:opacity .09s;
+}
+.gtit{font-size:13px; font-weight:600; margin-bottom:2px}
+.gsub{font-size:12px; color:var(--tinta3); margin-bottom:7px}
+.leyenda{display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12.5px; color:var(--tinta2); margin-bottom:8px}
+.leyenda span{display:flex; align-items:center; gap:6px}
+.leyenda i{width:12px; height:3px; border-radius:2px; display:block}
+
+/* diálogo */
+dialog{border:1px solid var(--linea); border-radius:14px; padding:0; max-width:560px; width:92vw; color:var(--tinta)}
+dialog::backdrop{background:rgba(43,15,33,.45)}
+.dlg{padding:22px 24px}
+dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,monospace; font-size:12px; border:1px solid var(--linea); border-radius:8px; padding:10px; resize:vertical}
+.dlg-pie{display:flex; justify-content:flex-end; gap:9px; margin-top:14px}
+
+.cargando{padding:60px 0; text-align:center; color:var(--tinta2)}
+
+@media (max-width:860px){
+  .chasis{flex-direction:column}
+  .rail{
+    width:auto; flex:none; height:auto; position:static;
+    display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; padding:14px 16px 16px;
+  }
+  .marca{grid-column:1/-1; font-size:17px}
+  .marca span{font-size:12px}
+  .rail nav{grid-column:1/-1; flex-direction:row; flex-wrap:wrap; gap:4px}
+  .rail nav a{padding:6px 11px}
+  .rail footer{grid-column:1/-1; margin-top:0}
+  .rail footer button{margin-top:0}
+  .pila{flex-direction:row}
+  .pila button{flex:1; text-align:center}
+  main{padding:20px 16px 60px}
+  .resultado{grid-template-columns:1fr}
+  .placa{min-width:0}
+  .lectura .mg{font-size:46px}
+  .cabecera h1{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+<div class="chasis">
+  <aside class="rail">
+    <div class="marca">MetroDecide<span>Verificación de contenido de principio activo por espectroscopía NIR</span></div>
+
+    <nav aria-label="Secciones">
+      <a href="#medicion" id="nav-medicion">Medición</a>
+      <a href="#ficha" id="nav-ficha">Ficha del método</a>
+      <a href="#riesgos" id="nav-riesgos">Riesgos de la regla</a>
+    </nav>
+
+    <div class="grupo">
+      <b>Equipo</b>
+      <div class="seg" id="sel-equipo" role="group" aria-label="Equipo">
+        <button type="button" data-eq="1" aria-pressed="true">NIR-1</button>
+        <button type="button" data-eq="2" aria-pressed="false">NIR-2</button>
+      </div>
+    </div>
+
+    <div class="grupo">
+      <b>Modelo declarado</b>
+      <div class="pila" id="sel-modelo" role="group" aria-label="Modelo"></div>
+    </div>
+
+    <footer>
+      <span id="pie-modelo"></span>
+      <button type="button" id="btn-json">Cargar otro JSON del modelo</button>
+      <input type="file" id="archivo-json" accept=".json,application/json" hidden>
+    </footer>
+  </aside>
+
+  <main>
+    <div id="cargando" class="cargando">Cargando el modelo…</div>
+
+    <!-- ══════════════════ 1. MEDICIÓN ══════════════════ -->
+    <section class="pantalla" id="p-medicion" hidden>
+      <div class="cabecera">
+        <h1>Medición de una tableta</h1>
+      </div>
+
+      <div class="selectores">
+        <label class="campo">Tableta
+          <select id="sel-tableta"></select>
+        </label>
+        <button type="button" class="btn" id="btn-pegar">Pegar un espectro</button>
+      </div>
+
+      <div class="tarjeta">
+        <div class="resultado">
+          <div class="lectura">
+            <div class="mg"><span id="r-mg">—</span><small>mg</small></div>
+            <div class="inc" id="r-inc"></div>
+          </div>
+          <div class="placa" id="r-placa"><span class="v">—</span><span class="q"></span></div>
+        </div>
+        <div class="grafico" id="g-regla" style="margin-top:20px"></div>
+        <div class="regla-pie">
+          <span><b>Regla de decisión</b> binaria con banda de guarda, w = U (ILAC-G8 4.2.3)</span>
+          <span><b>Equipo</b> <span id="r-equipo"></span></span>
+          <span><b>Modelo</b> <span id="r-modelo"></span></span>
+          <span><b>Tolerancia</b> <span id="r-tol"></span></span>
+          <span><b>Aceptación</b> <span id="r-acep"></span></span>
+        </div>
+      </div>
+
+      <div id="pasos"></div>
+    </section>
+
+    <!-- ══════════════════ 2. FICHA ══════════════════ -->
+    <section class="pantalla" id="p-ficha" hidden>
+      <div class="cabecera">
+        <h1>Ficha del método</h1>
+      </div>
+      <div id="ficha-cuerpo"></div>
+    </section>
+
+    <!-- ══════════════════ 3. RIESGOS ══════════════════ -->
+    <section class="pantalla" id="p-riesgos" hidden>
+      <div class="cabecera">
+        <h1>Riesgos de la regla</h1>
+      </div>
+      <div id="riesgos-cuerpo"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="dlg-pegar">
+  <form class="dlg" method="dialog">
+    <h2 style="font-size:18px; margin-bottom:6px">Pegar un espectro</h2>
+    <p class="hint">650 valores de absorbancia log(1/T), de 600 a 1898 nm cada 2 nm, separados por espacios, comas o saltos de línea.</p>
+    <textarea id="txt-espectro" placeholder="0.21345 0.21402 0.21488 …"></textarea>
+    <p class="hint" id="msg-pegar" style="margin:7px 0 0"></p>
+    <div class="dlg-pie">
+      <button type="button" class="btn" id="cancelar-pegar">Cancelar</button>
+      <button type="button" class="btn primario" id="usar-pegar">Medir este espectro</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* Núcleo de cálculo de MetroNIR.
+   Reproduce en el navegador los cinco pasos del script de R:
+   SNV -> Savitzky-Golay -> recorte -> predicción -> compuerta de dominio -> veredicto.
+   No recalcula el modelo: todo sale del JSON. */
+(function (raiz) {
+  "use strict";
+
+  /* Paso 1. SNV con desviación poblacional (N = 650, no 649). */
+  function snv(x) {
+    var n = x.length, i, s = 0, s2 = 0, m, d, out = new Float64Array(n);
+    for (i = 0; i < n; i++) s += x[i];
+    m = s / n;
+    for (i = 0; i < n; i++) { var c = x[i] - m; s2 += c * c; }
+    d = Math.sqrt(s2 / n);
+    for (i = 0; i < n; i++) out[i] = (x[i] - m) / d;
+    return { valores: out, media: m, desviacion: d };
+  }
+
+  /* Paso 2. Savitzky-Golay igual que signal::sgolayfilt de R.
+     F es la matriz n x n del filtro; la fila central filtra el interior
+     y las primeras y últimas k filas resuelven los bordes. */
+  function sgolayfilt(x, F) {
+    var n = F.length, k = n >> 1, N = x.length, out = new Float64Array(N), i, j, acc;
+    for (j = 0; j < k; j++) {
+      acc = 0;
+      for (i = 0; i < n; i++) acc += F[j][i] * x[i];
+      out[j] = acc;
+    }
+    var b = F[k];
+    for (j = k; j < N - k; j++) {
+      acc = 0;
+      for (i = 0; i < n; i++) acc += b[i] * x[j + k - i];
+      out[j] = acc;
+    }
+    for (j = 0; j < k; j++) {
+      acc = 0;
+      for (i = 0; i < n; i++) acc += F[k + 1 + j][i] * x[N - n + i];
+      out[N - k + j] = acc;
+    }
+    return out;
+  }
+
+  /* Paso 3. Predicción. Los pesos ya llevan el filtro y el recorte adentro,
+     así que se aplican directamente a la salida del paso 1. */
+  function predecir(s, inst) {
+    var acc = 0, w = inst.pesos, i;
+    for (i = 0; i < w.length; i++) acc += s[i] * w[i];
+    return {
+      bruto: inst.intercepto + acc,
+      x_mg: inst.intercepto + acc - inst.b,
+      aporte: acc,
+    };
+  }
+
+  /* Paso 4. ¿La tableta es evaluable? leverage h (16.2, Ec. 69)
+     y residuo espectral RMSSR (16.4.4, Ec. 75). */
+  function dominio(z, dom) {
+    var p = z.length, A = dom.cargas[0].length, i, a, bb;
+    var zc = new Float64Array(p);
+    for (i = 0; i < p; i++) zc[i] = z[i] - dom.centro[i];
+
+    var sc = new Float64Array(A);          // scores; no se llaman t a propósito
+    for (a = 0; a < A; a++) {
+      var acc = 0;
+      for (i = 0; i < p; i++) acc += zc[i] * dom.cargas[i][a];
+      sc[a] = acc;
+    }
+
+    var h = 0;
+    for (a = 0; a < A; a++)
+      for (bb = 0; bb < A; bb++) h += sc[a] * dom.G[a][bb] * sc[bb];
+
+    var ss = 0;
+    var recon = new Float64Array(p);
+    for (i = 0; i < p; i++) {
+      var r = 0;
+      for (a = 0; a < A; a++) r += dom.cargas[i][a] * sc[a];
+      recon[i] = r;
+      var e = zc[i] - r;
+      ss += e * e;
+    }
+    var RMSSR = Math.sqrt(ss / p);
+
+    return {
+      scores: Array.from(sc), h: h, RMSSR: RMSSR,
+      T2: h * (dom.T2_lim / dom.h_lim), Q: RMSSR * RMSSR * p,
+      h_ok: h <= dom.h_lim, R_ok: RMSSR <= dom.RMSSR_lim,
+      en_dominio: h <= dom.h_lim && RMSSR <= dom.RMSSR_lim,
+      reconstruido: recon, centrado: zc,
+    };
+  }
+
+  /* Paso 5. Veredicto. AL y AU vienen calculados en el JSON. */
+  function veredicto(x_mg, en_dom, inst) {
+    if (!en_dom) return "NO EVALUABLE";
+    return (x_mg >= inst.AL && x_mg <= inst.AU) ? "CONFORME" : "NO CONFORME";
+  }
+
+  /* Los cinco pasos encadenados sobre un espectro crudo de 650 valores. */
+  function medir(espectro, equipo, modelo, F) {
+    var clave = equipo === 1 ? "NIR_1" : "NIR_2";
+    var inst = modelo.instrumentos[clave];
+    var dom = modelo.dominio[clave];
+
+    var p1 = snv(espectro);
+    var z650 = sgolayfilt(p1.valores, F);
+    var corte = modelo.longitudes_nm.filter(function (v) {
+      return v <= modelo.parametros.corte_nm;
+    }).length;
+    var z = z650.subarray(0, corte);
+
+    var p3 = predecir(p1.valores, inst);
+    var p4 = dominio(z, dom);
+    var v = veredicto(p3.x_mg, p4.en_dominio, inst);
+
+    return {
+      equipo: clave, crudo: espectro, snv: p1, z650: z650, z: z, corte: corte,
+      prediccion: p3, dominio: p4, veredicto: v, inst: inst, dom: dom,
+      motivo: p4.en_dominio ? "" :
+        (!p4.h_ok && !p4.R_ok ? "leverage+RMSSR" : (!p4.h_ok ? "leverage" : "RMSSR")),
+    };
+  }
+
+  raiz.CALC = { snv: snv, sgolayfilt: sgolayfilt, predecir: predecir,
+                dominio: dominio, veredicto: veredicto, medir: medir };
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+"use strict";
+/* ═══════════════════════════ estado ═══════════════════════════ */
+var D = null, F = null, MODELO = null, NOMBRE_MODELO = null, EQUIPO = 1, TABLETA = null, PEGADO = null;
+var ONDAS = [];
+for (var i = 0; i < 650; i++) ONDAS.push(600 + 2 * i);
+
+var COL = {rosa:"#B3123F", verde:"#0E8F6F", ocre:"#B07415", azul:"#2457C5",
+           ciruela:"#3B0F28", tinta3:"#9B7889", linea:"#EBD3DE", rosaPal:"#FBE3EC"};
+
+var fmt = function (v, d) {
+  if (v == null || !isFinite(v)) return "—";
+  return v.toLocaleString("es-CR", {minimumFractionDigits:d, maximumFractionDigits:d});
+};
+var el = function (t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]; }); };
+var claveV = function (v) { return "v-" + v.replace(/ /g, ""); };
+
+/* ═══════════════════════════ gráficos ═══════════════════════════ */
+function svgNS(t, a) {
+  var e = document.createElementNS("http://www.w3.org/2000/svg", t);
+  for (var k in a) e.setAttribute(k, a[k]);
+  return e;
+}
+/* En pantallas angostas se usa un viewBox más pequeño: como el SVG se escala al
+   ancho del contenedor, el texto queda proporcionalmente más grande y legible. */
+var angosta = function () { return window.innerWidth < 760; };
+
+/* La regla de conformidad: tolerancia, banda de guarda, resultado y su U. */
+function graficoRegla(destino, m, assay) {
+  var estrecho = angosta();
+  var W = estrecho ? 420 : 900, H = estrecho ? 136 : 128, mL = 18, mR = 18, base = estrecho ? 78 : 74;
+  var TL = MODELO.tolerancia_mg.TL, TU = MODELO.tolerancia_mg.TU;
+  var AL = m.inst.AL, AU = m.inst.AU, U = m.inst.U, x = m.prediccion.x_mg;
+  var lo = 150, hi = 245;
+  lo = Math.min(lo, x - U - 4); hi = Math.max(hi, x + U + 4);
+  var X = function (v) { return mL + (v - lo) / (hi - lo) * (W - mL - mR); };
+
+  destino.innerHTML = "";
+  var cont = el("div", "grafico");
+  var svg = svgNS("svg", {viewBox:"0 0 " + W + " " + H, role:"img",
+    "aria-label":"Resultado " + fmt(x,1) + " mg frente a la tolerancia de " + TL + " a " + TU + " mg"});
+
+  var defs = svgNS("defs", {});
+  var pat = svgNS("pattern", {id:"rayado", width:7, height:7, patternTransform:"rotate(45)",
+    patternUnits:"userSpaceOnUse"});
+  pat.appendChild(svgNS("rect", {width:7, height:7, fill:"#fff"}));
+  pat.appendChild(svgNS("line", {x1:0, y1:0, x2:0, y2:7, stroke:COL.rosa, "stroke-width":2.4, opacity:.42}));
+  defs.appendChild(pat); svg.appendChild(defs);
+
+  /* zona de aceptación y bandas de guarda */
+  svg.appendChild(svgNS("rect", {x:X(AL), y:base-26, width:X(AU)-X(AL), height:26, fill:"#DCF2EB"}));
+  [[TL,AL],[AU,TU]].forEach(function (p) {
+    svg.appendChild(svgNS("rect", {x:X(p[0]), y:base-26, width:X(p[1])-X(p[0]), height:26, fill:"url(#rayado)"}));
+  });
+  svg.appendChild(svgNS("rect", {x:X(TL), y:base-26, width:X(TU)-X(TL), height:26,
+    fill:"none", stroke:COL.rosa, "stroke-width":1.5}));
+
+  /* eje */
+  svg.appendChild(svgNS("line", {x1:mL, x2:W-mR, y1:base, y2:base, stroke:COL.linea, "stroke-width":1.5}));
+  var pasoTick = estrecho ? 10 : 5, pasoRot = estrecho ? 20 : 10;
+  for (var v = 150; v <= hi; v += pasoTick) {
+    if (v < lo) continue;
+    var mayor = v % pasoRot === 0;
+    svg.appendChild(svgNS("line", {x1:X(v), x2:X(v), y1:base, y2:base + (mayor ? 7 : 4),
+      stroke:COL.linea, "stroke-width":1.5}));
+    /* el último rótulo se omite para no chocar con la unidad */
+    if (mayor && X(v) <= W - mR - (estrecho ? 24 : 18)) {
+      var t = svgNS("text", {x:X(v), y:base+21, fill:COL.tinta3, "font-size":10.5, "text-anchor":"middle"});
+      t.textContent = v; svg.appendChild(t);
+    }
+  }
+  var um = svgNS("text", {x:W-mR, y:base+21, fill:COL.tinta3, "font-size":10.5, "text-anchor":"end"});
+  um.textContent = "mg"; svg.appendChild(um);
+
+  /* rótulos de los cuatro límites */
+  [[TL,"TL "+fmt(TL,0),COL.rosa,0],[AL,"AL "+fmt(AL,1),COL.verde,1],
+   [AU,"AU "+fmt(AU,1),COL.verde,1],[TU,"TU "+fmt(TU,0),COL.rosa,0]].forEach(function (p, i) {
+    /* en pantalla angosta los cuatro rótulos se reparten en dos renglones */
+    var y = base - 32 - (estrecho ? p[3] * 12 : 0);
+    var t = svgNS("text", {x:X(p[0]), y:y, fill:p[2], "font-size":11, "font-weight":600,
+      "text-anchor":i === 0 ? "start" : (i === 3 ? "end" : "middle")});
+    t.textContent = p[1]; svg.appendChild(t);
+  });
+
+  /* valor de referencia del laboratorio, cuando lo hay */
+  if (assay != null) {
+    var dy = base + 30;
+    svg.appendChild(svgNS("path", {d:"M" + X(assay) + " " + (dy-5) + "l5 5-5 5-5-5z",
+      fill:"#fff", stroke:COL.ciruela, "stroke-width":1.5}));
+    var derecha = X(assay) > (W * 0.62);
+    var tr = svgNS("text", {x:X(assay) + (derecha ? -10 : 10), y:dy+4, fill:COL.tinta3,
+      "font-size":10.5, "text-anchor":derecha ? "end" : "start"});
+    tr.textContent = (estrecho ? "ref. laboratorio " : "referencia del laboratorio ") + fmt(assay,1) + " mg";
+    svg.appendChild(tr);
+  }
+
+  /* resultado con su incertidumbre; si está fuera del dominio se dibuja hueco,
+     porque el modelo no tiene autoridad para afirmar ese valor */
+  var sinAutoridad = m.veredicto === "NO EVALUABLE";
+  var cv = m.veredicto === "CONFORME" ? COL.verde : (m.veredicto === "NO CONFORME" ? COL.rosa : COL.ocre);
+  var guion = sinAutoridad ? {"stroke-dasharray":"5 3"} : {};
+  var yb = base - (estrecho ? 58 : 46);
+  function trazo(a) { for (var k in guion) a[k] = guion[k]; return svgNS("line", a); }
+  svg.appendChild(trazo({x1:X(x-U), x2:X(x+U), y1:yb, y2:yb, stroke:cv, "stroke-width":2.5}));
+  [x-U, x+U].forEach(function (p) {
+    svg.appendChild(svgNS("line", {x1:X(p), x2:X(p), y1:yb-5, y2:yb+5, stroke:cv, "stroke-width":2.5}));
+  });
+  svg.appendChild(trazo({x1:X(x), x2:X(x), y1:yb, y2:base, stroke:cv, "stroke-width":2.5}));
+  svg.appendChild(svgNS("circle", {cx:X(x), cy:yb, r:5.5, fill:sinAutoridad ? "#fff" : cv,
+    stroke:sinAutoridad ? cv : "#fff", "stroke-width":2.5}));
+  var tv = svgNS("text", {x:X(x), y:yb-12, fill:cv, "font-size":12.5, "font-weight":700, "text-anchor":"middle"});
+  tv.textContent = fmt(x,1) + " ± " + fmt(U,2);
+  svg.appendChild(tv);
+
+  cont.appendChild(svg); destino.appendChild(cont);
+  var lg = el("div", "leyenda", '<span><i style="background:#DCF2EB;height:10px;width:14px"></i>aceptación</span>' +
+    '<span><i style="background:' + COL.rosa + ';height:10px;width:14px;opacity:.45"></i>banda de guarda</span>' +
+    '<span><i style="background:' + cv + '"></i>' +
+    (sinAutoridad ? "estimación fuera del dominio" : "resultado ± U") + "</span>");
+  lg.style.marginTop = "6px"; lg.style.marginBottom = "0";
+  destino.appendChild(lg);
+}
+
+/* Barrido de la banda de guarda: los dos riesgos en función de r. */
+function graficoRiesgo(destino, filas) {
+  var estrecho = angosta();
+  var W = estrecho ? 420 : 660, H = estrecho ? 220 : 240;
+  var mL = 44, mR = estrecho ? 14 : 128, mT = 16, mB = 34;
+  var rs = filas.map(function (f) { return f.r; });
+  var X = function (i) { return mL + i / (rs.length - 1) * (W - mL - mR); };
+  var Y = function (v) { return mT + (100 - v) / 100 * (H - mT - mB); };
+  var ser = [
+    {nombre:"Falsas aceptaciones", color:COL.rosa, y:filas.map(function (f) { return f.falsas_acept_pct || 0; })},
+    {nombre:"Falsos rechazos", color:COL.azul, y:filas.map(function (f) { return f.falsos_rech_pct || 0; })}
+  ];
+
+  destino.innerHTML = "";
+  var lg = el("div", "leyenda");
+  ser.forEach(function (s) { lg.appendChild(el("span", null, '<i style="background:' + s.color + '"></i>' + s.nombre)); });
+  destino.appendChild(lg);
+
+  var cont = el("div", "grafico");
+  var svg = svgNS("svg", {viewBox:"0 0 " + W + " " + H, role:"img",
+    "aria-label":"Riesgos en función del ancho de la banda de guarda"});
+  for (var g = 0; g <= 4; g++) {
+    var yv = g * 25;
+    svg.appendChild(svgNS("line", {x1:mL, x2:W-mR, y1:Y(yv), y2:Y(yv), stroke:COL.linea, "stroke-width":1}));
+    var t = svgNS("text", {x:mL-7, y:Y(yv)+3.5, fill:COL.tinta3, "font-size":10, "text-anchor":"end"});
+    t.textContent = yv + " %"; svg.appendChild(t);
+  }
+  rs.forEach(function (r, i) {
+    var t = svgNS("text", {x:X(i), y:H-16, fill:COL.tinta3, "font-size":10.5, "text-anchor":"middle"});
+    t.textContent = "r = " + fmt(r, r % 1 ? 1 : 0); svg.appendChild(t);
+    var w = svgNS("text", {x:X(i), y:H-4, fill:COL.tinta3, "font-size":9.5, "text-anchor":"middle"});
+    w.textContent = fmt(filas[i].w_mg,1) + " mg"; svg.appendChild(w);
+  });
+  var iAdo = rs.indexOf(1);
+  if (iAdo >= 0) {
+    svg.appendChild(svgNS("line", {x1:X(iAdo), x2:X(iAdo), y1:mT, y2:H-mB,
+      stroke:COL.ciruela, "stroke-width":1.5, "stroke-dasharray":"4 3"}));
+    var ta = svgNS("text", {x:X(iAdo), y:mT-2, fill:COL.ciruela, "font-size":10.5, "font-weight":600, "text-anchor":"middle"});
+    ta.textContent = "regla adoptada"; svg.appendChild(ta);
+  }
+  ser.forEach(function (s) {
+    var d = "";
+    s.y.forEach(function (v, i) { d += (i ? "L" : "M") + X(i) + " " + Y(v) + " "; });
+    svg.appendChild(svgNS("path", {d:d, fill:"none", stroke:s.color, "stroke-width":2.5, "stroke-linejoin":"round"}));
+    s.y.forEach(function (v, i) {
+      svg.appendChild(svgNS("circle", {cx:X(i), cy:Y(v), r:4.5, fill:s.color, stroke:"#fff", "stroke-width":2}));
+    });
+    if (!estrecho) {
+      var fin = svgNS("text", {x:X(s.y.length-1)+10, y:Y(s.y[s.y.length-1])+4, fill:s.color,
+        "font-size":11.5, "font-weight":600});
+      fin.textContent = s.nombre; svg.appendChild(fin);
+    }
+  });
+  cont.appendChild(svg); destino.appendChild(cont);
+}
+
+/* ═══════════════════════════ pantalla 1 ═══════════════════════════ */
+function medir() {
+  var esp, assay = null, etiq = [];
+  if (!MODELO || (!PEGADO && TABLETA == null)) return;
+  if (PEGADO) { esp = PEGADO; }
+  else {
+    var t = D.tabletas[TABLETA];
+    esp = EQUIPO === 1 ? t.e1 : t.e2;
+    assay = t.assay; etiq = t.etiquetas;
+  }
+  var m = window.CALC.medir(esp, EQUIPO, MODELO, F);
+  pintarResultado(m, assay, etiq);
+  pintarPasos(m, assay);
+}
+
+function pintarResultado(m, assay, etiq) {
+  var v = m.veredicto, inst = m.inst;
+  document.getElementById("r-mg").textContent = fmt(m.prediccion.x_mg, 1);
+  document.getElementById("r-inc").innerHTML =
+    "± " + fmt(inst.U, 2) + " mg (k = " + MODELO.regla_decision.k + ", cobertura aproximada del 95 %)" +
+    (assay != null ? ' · <span style="color:var(--tinta3)">referencia del laboratorio ' + fmt(assay,1) + " mg</span>" : "");
+
+  var placa = document.getElementById("r-placa");
+  placa.className = "placa " + claveV(v);
+  var glosa = v === "NO EVALUABLE" ? "va al laboratorio de referencia" : "";
+  placa.innerHTML = '<span class="v">' + v + "</span>" +
+    (glosa ? '<span class="q">' + glosa + "</span>" : "");
+
+  document.getElementById("r-equipo").textContent = EQUIPO === 1 ? "NIR-1" : "NIR-2";
+  document.getElementById("r-modelo").textContent = NOMBRE_MODELO.replace(/_/g, " ");
+  document.getElementById("r-tol").textContent = fmt(MODELO.tolerancia_mg.TL,0) + " a " + fmt(MODELO.tolerancia_mg.TU,0) + " mg";
+  document.getElementById("r-acep").textContent = fmt(inst.AL,1) + " a " + fmt(inst.AU,1) + " mg";
+
+  graficoRegla(document.getElementById("g-regla"), m, assay);
+}
+
+function pintarPasos(m) {
+  var cont = document.getElementById("pasos");
+  var dom = m.dominio;
+  cont.innerHTML = "";
+
+  var t = el("div", "tarjeta");
+  var enc = el("div", "enc-dominio");
+  enc.appendChild(el("h2", null, "Dominio espectral"));
+  enc.appendChild(el("span", "estado-dominio", dom.en_dominio
+    ? '<span style="color:var(--verde)">Dentro del dominio</span>'
+    : '<span style="color:var(--ocre)">Fuera del dominio · ' + esc(m.motivo) + "</span>"));
+  t.appendChild(enc);
+  t.appendChild(medidor("Leverage h", dom.h, m.dom.h_lim, dom.h_ok, 5, "ASTM E1655 16.2, Ec. 69"));
+  t.appendChild(medidor("Residuo espectral RMSSR", dom.RMSSR, m.dom.RMSSR_lim, dom.R_ok, 7,
+    "ASTM E1655 16.4.4, Ec. 75"));
+  cont.appendChild(t);
+}
+
+function medidor(nombre, valor, limite, ok, dec, numeral) {
+  var d = el("div", "medidor");
+  var txt = dec > 5 ? valor.toExponential(3) : fmt(valor, dec);
+  var ltxt = dec > 5 ? limite.toExponential(3) : fmt(limite, dec);
+  d.appendChild(el("div", "fila",
+    "<span>" + esc(nombre) + ' <span class="numeral">' + esc(numeral) + "</span></span>" +
+    "<span><b>" + txt + "</b> " +
+    '<span style="color:var(--tinta3)">/ ' + ltxt + "</span></span>"));
+  /* la barra llega un poco más allá del límite para que la marca quede visible */
+  var pct = valor / limite * 100;
+  var tope = Math.max(limite * 1.12, valor * 1.03);
+  var col = ok ? COL.verde : COL.ocre;
+  var barra = el("div", "barra");
+  barra.innerHTML = '<i style="width:' + (valor / tope * 100).toFixed(1) + '%; background:' + col + '"></i>' +
+    '<u style="left:' + (limite / tope * 100).toFixed(1) + '%"></u>';
+  d.appendChild(barra);
+  d.appendChild(el("div", "leyenda-med", fmt(pct, 1) + " % del límite"));
+  return d;
+}
+
+/* ═══════════════════════════ pantalla 2 ═══════════════════════════ */
+function pintarFicha() {
+  var c = document.getElementById("ficha-cuerpo");
+  var r = MODELO.resumen, p = MODELO.parametros;
+  c.innerHTML = "";
+
+  var t0 = el("div", "tarjeta");
+  t0.appendChild(el("h2", null, NOMBRE_MODELO.replace(/_/g, " ")));
+  var par = Object.keys(p).map(function (k) { return k.replace(/_/g, " ") + " = " + p[k]; }).join(" · ");
+  t0.appendChild(el("p", "hint", esc(par)));
+  var st = el("dl", "stats");
+  function stat(k, v, u) {
+    var d = el("div");
+    d.appendChild(el("dt", null, esc(k)));
+    d.appendChild(el("dd", null, v + (u ? " <small>" + u + "</small>" : "")));
+    st.appendChild(d);
+  }
+  stat("SEC NIR-1", fmt(MODELO.SEC_mg.NIR_1, 2), "mg");
+  stat("SEC NIR-2", fmt(MODELO.SEC_mg.NIR_2, 2), "mg");
+  stat("SEV NIR-1", fmt(MODELO.SEV_mg.NIR_1, 2), "mg");
+  stat("SEV NIR-2", fmt(MODELO.SEV_mg.NIR_2, 2), "mg");
+  stat("U NIR-1", fmt(MODELO.instrumentos.NIR_1.U, 2), "mg");
+  stat("U NIR-2", fmt(MODELO.instrumentos.NIR_2.U, 2), "mg");
+  stat("Acuerdo entre equipos", "±" + fmt(r.acuerdo_95_mg, 2), "mg");
+  stat("Veredictos discordantes", fmt(r.veredicto_dist_test, 1), "%");
+  stat("Intervalo de calibración", fmt(D.meta.rango_calibracion_mg[0], 1) + " a " +
+    fmt(D.meta.rango_calibracion_mg[1], 1), "mg");
+  stat("Tabletas de calibración", D.meta.n_cal, "");
+  t0.appendChild(st);
+  c.appendChild(t0);
+
+  /* cuestionario de la Sección 25 */
+  var t1 = el("div", "tarjeta");
+  t1.appendChild(el("h2", null, "Cuestionario de la Sección 25"));
+  t1.appendChild(tabla(MODELO.verificacion_modelo,
+    [["numeral","Numeral"],["criterio","Criterio"],["valor","Valor obtenido"],["veredicto","Veredicto"]]));
+  var noes = MODELO.verificacion_modelo.filter(function (f) { return f.veredicto === "NO"; });
+  if (noes.length) {
+    t1.appendChild(el("div", "aviso",
+      "<b>" + noes.length + " respuesta" + (noes.length > 1 ? "s" : "") + " negativa" +
+      (noes.length > 1 ? "s" : "") + " (25.1.2).</b>"));
+  }
+  c.appendChild(t1);
+
+  /* trazabilidad completa */
+  var t2 = el("div", "tarjeta");
+  t2.appendChild(el("h2", null, "Trazabilidad normativa"));
+  t2.appendChild(tabla(MODELO.trazabilidad,
+    [["norma","Norma"],["numeral","Numeral"],["criterio","Criterio"],["valor","Valor obtenido"],["veredicto","Veredicto"]],
+    "norma"));
+  c.appendChild(t2);
+
+  if (MODELO.pretratamiento && MODELO.pretratamiento.pendiente_correccion) {
+    var t3 = el("div", "tarjeta");
+    t3.appendChild(el("div", "aviso ocre",
+      "El JSON cargado trae <code>pretratamiento.pendiente_correccion = true</code>."));
+    c.appendChild(t3);
+  }
+}
+
+/* cols: [clave, encabezado, formateador opcional] */
+function tabla(filas, cols, clase) {
+  var env = el("div", "envoltura-tabla");
+  var t = el("table", clase || null);
+  var thead = el("thead"), tr = el("tr");
+  cols.forEach(function (c) {
+    tr.appendChild(el("th", c[2] ? "num" : null, esc(c[1])));
+  });
+  thead.appendChild(tr); t.appendChild(thead);
+  var tb = el("tbody");
+  filas.forEach(function (f) {
+    var r = el("tr");
+    cols.forEach(function (c) {
+      var v = f[c[0]];
+      if (c[2]) r.appendChild(el("td", "num", esc(c[2](v, f))));
+      else if (c[0] === "veredicto") r.appendChild(el("td", null, '<span class="chip chip-' + esc(v) + '">' + esc(v) + "</span>"));
+      else if (typeof v === "number") r.appendChild(el("td", "num", fmt(v, Number.isInteger(v) ? 0 : 2)));
+      else r.appendChild(el("td", null, esc(v == null ? "—" : v)));
+    });
+    tb.appendChild(r);
+  });
+  t.appendChild(tb); env.appendChild(t);
+  return env;
+}
+
+/* ═══════════════════════════ pantalla 3 ═══════════════════════════ */
+function pintarRiesgos() {
+  var c = document.getElementById("riesgos-cuerpo");
+  var rg = MODELO.riesgos, clave = EQUIPO === 1 ? "NIR_1" : "NIR_2", nom = EQUIPO === 1 ? "NIR-1" : "NIR-2";
+  var filas = rg.barrido_banda.filter(function (f) { return f.equipo === nom; });
+  var est = rg.rechazo_estructural[clave];
+  var res = MODELO.resumen[clave];
+  c.innerHTML = "";
+
+  var t0 = el("div", "tarjeta");
+  t0.appendChild(el("h2", null, "Elegir el ancho de la banda es elegir a quién se protege"));
+  var g = el("div");
+  g.style.marginTop = "14px";
+  t0.appendChild(g);
+  var d1 = function (v) { return fmt(v, 1); };
+  var d0 = function (v) { return fmt(v, 0); };
+  var pct = function (v) { return v == null ? "—" : fmt(v, 1) + " %"; };
+  t0.appendChild(tabla(filas, [
+    ["r", "r", function (v) { return fmt(v, v % 1 ? 1 : 0); }],
+    ["w_mg", "w (mg)", d1], ["AL", "AL (mg)", d1], ["AU", "AU (mg)", d1],
+    ["falsas_acept", "Falsas aceptaciones", d0],
+    ["falsas_acept_pct", "% de las fuera de tolerancia", pct],
+    ["falsos_rech", "Falsos rechazos", d0],
+    ["falsos_rech_pct", "% de las conformes", pct]]));
+  c.appendChild(t0);
+  graficoRiesgo(g, filas);
+
+  var t1 = el("div", "tarjeta");
+  t1.appendChild(el("h2", null, "Resultados en " + nom));
+  var st = el("dl", "stats");
+  function stat(k, v, u) {
+    var d = el("div");
+    d.appendChild(el("dt", null, esc(k)));
+    d.appendChild(el("dd", null, v + (u ? " <small>" + u + "</small>" : "")));
+    st.appendChild(d);
+  }
+  stat("Tabletas evaluables", res.n - res.no_evaluables, "de " + res.n);
+  stat("No evaluables", res.no_evaluables, "de " + res.n);
+  stat("Falsos rechazos", res.falsos_rechazos, "de " + res.conformes);
+  stat("Rechazo estructural", est.n, fmt(est.pct_de_conformes, 1) + " % de conformes");
+  stat("Falsas aceptaciones", res.falsas_acept, "de " + res.no_conformes);
+  t1.appendChild(st);
+  c.appendChild(t1);
+}
+
+/* ═══════════════════════════ armazón ═══════════════════════════ */
+var PANTALLAS = ["medicion", "ficha", "riesgos"];
+function mostrar(nombre) {
+  if (PANTALLAS.indexOf(nombre) < 0) nombre = "medicion";
+  PANTALLAS.forEach(function (p) {
+    document.getElementById("p-" + p).hidden = p !== nombre;
+    var a = document.getElementById("nav-" + p);
+    if (p === nombre) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  if (nombre === "ficha") pintarFicha();
+  if (nombre === "riesgos") pintarRiesgos();
+}
+
+function pintarSelectorModelo() {
+  var cont = document.getElementById("sel-modelo");
+  cont.innerHTML = "";
+  Object.keys(D.modelos).forEach(function (k) {
+    var b = el("button", null, k === "PLS_por_instrumento" ? "PLS por instrumento" : k.replace(/_/g, " "));
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(k === NOMBRE_MODELO));
+    b.addEventListener("click", function () {
+      NOMBRE_MODELO = k; MODELO = D.modelos[k];
+      pintarSelectorModelo(); pintarPie(); refrescar();
+    });
+    cont.appendChild(b);
+  });
+}
+
+function pintarPie() {
+  document.getElementById("pie-modelo").textContent = "";
+}
+
+function pintarSelectorTableta() {
+  var s = document.getElementById("sel-tableta");
+  s.innerHTML = "";
+  D.tabletas.forEach(function (t, i) {
+    var o = el("option");
+    o.value = i;
+    o.textContent = "Tableta " + t.id + " · referencia " + fmt(t.assay, 1) + " mg" +
+      (t.etiquetas.length ? " · " + t.etiquetas.join(", ") : "");
+    s.appendChild(o);
+  });
+  var pg = el("option"); pg.value = "pegado"; pg.textContent = "— espectro pegado —"; pg.disabled = true;
+  pg.id = "opt-pegado"; s.appendChild(pg);
+  s.value = String(TABLETA);
+}
+
+function refrescar() {
+  if (!document.getElementById("p-medicion").hidden) medir();
+  if (!document.getElementById("p-ficha").hidden) pintarFicha();
+  if (!document.getElementById("p-riesgos").hidden) pintarRiesgos();
+}
+
+function arrancar(datos) {
+  D = datos; F = D.sg && D.sg.F;
+  var claves0 = Object.keys(D.modelos || {});
+  NOMBRE_MODELO = claves0.indexOf("PLS_por_instrumento") >= 0 ? "PLS_por_instrumento" : claves0[0];
+  MODELO = NOMBRE_MODELO ? D.modelos[NOMBRE_MODELO] : null;
+  TABLETA = D.tabletas.length ? 0 : null;
+  document.getElementById("cargando").hidden = !!MODELO;
+  conectarCargaJSON();
+  if (!MODELO) return;
+  pintarSelectorModelo(); pintarPie(); pintarSelectorTableta();
+
+  document.getElementById("sel-equipo").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-eq]"); if (!b) return;
+    EQUIPO = Number(b.dataset.eq);
+    this.querySelectorAll("button").forEach(function (x) {
+      x.setAttribute("aria-pressed", String(Number(x.dataset.eq) === EQUIPO));
+    });
+    refrescar();
+  });
+  document.getElementById("sel-tableta").addEventListener("change", function () {
+    if (this.value === "pegado") return;
+    TABLETA = Number(this.value); PEGADO = null;
+    var o = document.getElementById("opt-pegado"); o.disabled = true;
+    medir();
+  });
+
+  /* pegar un espectro propio */
+  var dlg = document.getElementById("dlg-pegar");
+  document.getElementById("btn-pegar").addEventListener("click", function () {
+    document.getElementById("msg-pegar").textContent = ""; dlg.showModal();
+  });
+  document.getElementById("cancelar-pegar").addEventListener("click", function () { dlg.close(); });
+  document.getElementById("usar-pegar").addEventListener("click", function () {
+    var txt = document.getElementById("txt-espectro").value.trim();
+    var v = txt.split(/[\s,;]+/).map(Number).filter(function (x) { return !Number.isNaN(x); });
+    var msg = document.getElementById("msg-pegar");
+    if (v.length !== 650) {
+      msg.innerHTML = '<span style="color:var(--rosa)">Se leyeron ' + v.length +
+        " valores y hacen falta exactamente 650.</span>";
+      return;
+    }
+    PEGADO = v;
+    var o = document.getElementById("opt-pegado");
+    o.disabled = false; document.getElementById("sel-tableta").value = "pegado";
+    dlg.close(); medir();
+  });
+
+  window.addEventListener("hashchange", function () { mostrar(location.hash.slice(1)); });
+
+  /* los gráficos eligen su geometría según el ancho, así que se redibujan al cambiarlo */
+  var ancho = window.innerWidth, temporizador;
+  window.addEventListener("resize", function () {
+    if ((ancho < 760) === (window.innerWidth < 760)) { ancho = window.innerWidth; return; }
+    ancho = window.innerWidth;
+    clearTimeout(temporizador);
+    temporizador = setTimeout(refrescar, 180);
+  });
+
+  mostrar(location.hash.slice(1) || "medicion");
+  medir();
+}
+
+/* El botón de cargar JSON queda conectado incluso si datos.json no llegó. */
+function conectarCargaJSON() {
+  var inp = document.getElementById("archivo-json");
+  document.getElementById("btn-json").addEventListener("click", function () { inp.click(); });
+  inp.addEventListener("change", function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var lec = new FileReader();
+    lec.onload = function () {
+      try {
+        var j = JSON.parse(lec.result);
+        var nuevos = {};
+        if (j.modelo && j.instrumentos) nuevos[j.modelo] = j;
+        else Object.keys(j).forEach(function (k) { if (j[k] && j[k].instrumentos) nuevos[k] = j[k]; });
+        var claves = Object.keys(nuevos);
+        if (!claves.length) throw new Error("el archivo no trae ningún modelo con bloque instrumentos");
+        claves.forEach(function (k) {
+          var m = nuevos[k];
+          ["instrumentos","dominio","tolerancia_mg","trazabilidad","verificacion_modelo","riesgos","resumen"]
+            .forEach(function (b) { if (!m[b]) throw new Error("al modelo " + k + " le falta el bloque " + b); });
+          if (m.instrumentos.NIR_1.pesos.length !== 650)
+            throw new Error("los pesos de NIR-1 traen " + m.instrumentos.NIR_1.pesos.length + " valores y hacen falta 650");
+          if (!m.SEC_mg) m.SEC_mg = {NIR_1:NaN, NIR_2:NaN};
+          if (!m.SEV_mg) m.SEV_mg = {NIR_1:NaN, NIR_2:NaN};
+          if (!m.longitudes_nm) m.longitudes_nm = ONDAS;
+          if (!m.parametros) m.parametros = {corte_nm:1700};
+          if (m.parametros.corte_nm == null) m.parametros.corte_nm = 1700;
+        });
+        D.modelos = nuevos;
+        NOMBRE_MODELO = claves.indexOf("PLS_por_instrumento") >= 0 ? "PLS_por_instrumento" : claves[0];
+        MODELO = D.modelos[NOMBRE_MODELO];
+        document.getElementById("cargando").hidden = true;
+        pintarSelectorModelo(); pintarPie();
+        if (!document.getElementById("p-medicion").hidden ||
+            (document.getElementById("p-ficha").hidden && document.getElementById("p-riesgos").hidden)) {
+          mostrar(location.hash.slice(1) || "medicion");
+        }
+        refrescar();
+        alertaPie("Modelo cargado: " + claves.join(", ") + ".", false);
+      } catch (e) {
+        alertaPie("No se pudo usar ese archivo: " + e.message, true);
+      }
+    };
+    lec.readAsText(f);
+    this.value = "";
+  });
+}
+
+function alertaPie(txt, mal) {
+  var p = document.getElementById("pie-modelo");
+  p.innerHTML = '<span style="color:' + (mal ? "#FFB3C9" : "#9BE8CF") + '">' + esc(txt) + "</span>";
+  if (!mal) setTimeout(pintarPie, 6000);
+}
+
+fetch("datos.json")
+  .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(arrancar)
+  .catch(function (e) {
+    arrancar({modelos:{}, sg:{F:null}, tabletas:[],
+              meta:{n_cal:155, n_test:460, rango_calibracion_mg:[151.6, 239.1]}});
+    document.getElementById("cargando").innerHTML =
+      "No se pudo cargar <code>datos.json</code> (" + esc(e.message) + ").<br>" +
+      "Usá el botón «Cargar otro JSON del modelo» de la barra lateral para traer uno.";
+  });
+</script>
+</body>
+</html>
