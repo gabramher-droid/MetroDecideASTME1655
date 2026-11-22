@@ -19,6 +19,7 @@
   --rail:210px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{margin:0;padding:0}
 body{
   background:var(--papel); color:var(--tinta);
@@ -86,7 +87,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; ba
 
 .selectores{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:16px}
 label.campo{display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--tinta2); font-weight:500}
-label.campo select, label.campo input[type=text]{
+label.campo select, label.campo input[type=text], label.campo input[type=password]{
   font:inherit; font-size:14.5px; padding:8px 10px; border:1px solid var(--linea);
   border-radius:8px; background:#fff; color:var(--tinta); min-width:260px; max-width:100%;
 }
@@ -146,6 +147,8 @@ table.norma td:first-child, table.norma td:nth-child(2){white-space:nowrap}
 .chip-NO{background:var(--rosa-pal); color:var(--rosa)}
 .chip-INFORMATIVO{background:var(--ocre-pal); color:var(--ocre)}
 .envoltura-tabla{overflow-x:auto; margin:0 -6px; padding:0 6px}
+.envoltura-tabla.alta{max-height:440px; overflow-y:auto}
+.envoltura-tabla.alta thead th{position:sticky; top:0; background:#fff; z-index:1}
 
 /* estadísticas */
 .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); gap:8px; margin:14px 0 0}
@@ -184,6 +187,50 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
 
 .cargando{padding:60px 0; text-align:center; color:var(--tinta2)}
 
+/* ── sesión y acceso ── */
+.sesion{display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.6);
+  border-radius:9px; padding:9px 11px}
+.sesion > div{flex:1; min-width:0}
+.sesion b{display:block; font-size:13.5px; font-weight:600; line-height:1.25}
+.sesion .rol{display:block; font-size:11.5px; color:var(--tinta2)}
+.sesion button{border:0; background:transparent; color:var(--rosa); font:inherit;
+  font-size:12.5px; font-weight:600; cursor:pointer; padding:4px 6px; border-radius:6px}
+.sesion button:hover{background:var(--rosa-pal)}
+.nota-rol{font-size:11.5px; color:var(--tinta2); line-height:1.35}
+
+.acceso{display:grid; place-items:center; min-height:calc(100vh - 120px); padding:20px 0}
+.acceso-caja{background:var(--tarjeta); border:1px solid var(--linea); border-radius:14px;
+  padding:30px 32px; width:100%; max-width:420px}
+.acceso-caja h1{font-size:27px; margin-bottom:3px}
+.acceso-caja form{margin-top:20px; display:flex; flex-direction:column; gap:13px}
+.acceso-caja .campo input{min-width:0; width:100%}
+.btn.ancho{width:100%; padding:11px; font-size:15px; margin-top:3px}
+.error{color:var(--rosa); font-size:13px; font-weight:500; margin:0}
+.demo-cuentas{margin-top:22px; padding-top:18px; border-top:1px solid var(--linea2); font-size:12.5px}
+.demo-cuentas b{display:block; font-size:13px; margin-bottom:5px}
+.demo-cuentas p{color:var(--tinta2); margin-bottom:10px; line-height:1.45}
+.demo-cuentas table{font-size:12.5px}
+.demo-cuentas th{padding:4px 10px 4px 0; font-size:11.5px}
+.demo-cuentas td{padding:4px 10px 4px 0; border-bottom:1px solid var(--linea2)}
+
+/* ── registro y tablero ── */
+.aviso-guardado{font-size:13px; font-weight:600; color:var(--verde); align-self:center}
+.barra-acc{display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-bottom:14px}
+.barra-acc .crece{flex:1}
+.filtros{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin-bottom:16px}
+.filtros select{font:inherit; font-size:14px; padding:7px 9px; border:1px solid var(--linea);
+  border-radius:8px; background:#fff; color:var(--tinta); min-width:140px}
+.vacio{padding:34px 0; text-align:center; color:var(--tinta2)}
+.lote-fila{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:baseline;
+  padding:11px 0; border-bottom:1px solid var(--linea2)}
+.lote-fila:last-child{border-bottom:0}
+.lote-fila b{font-weight:600; min-width:110px}
+.lote-fila .cuenta{color:var(--tinta2); font-size:13.5px}
+.chip-CONFORME{background:var(--verde-pal); color:var(--verde)}
+.chip-NOCONFORME{background:var(--rosa-pal); color:var(--rosa)}
+.chip-NOEVALUABLE{background:var(--ocre-pal); color:var(--ocre)}
+.chip-PENDIENTE{background:var(--ocre-pal); color:var(--ocre)}
+
 @media (max-width:860px){
   .chasis{flex-direction:column}
   .rail{
@@ -192,6 +239,10 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
   }
   .marca{grid-column:1/-1; font-size:17px}
   .marca span{font-size:12px}
+  .sesion{grid-column:1/-1}
+  #grupo-regla{grid-column:1/-1}
+  .acceso{min-height:0; padding:10px 0}
+  .acceso-caja{padding:24px 22px}
   .rail nav{grid-column:1/-1; flex-direction:row; flex-wrap:wrap; gap:4px}
   .rail nav a{padding:6px 11px}
   .rail footer{grid-column:1/-1; margin-top:0}
@@ -209,11 +260,20 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
 </head>
 <body>
 <div class="chasis">
-  <aside class="rail">
+  <aside class="rail" id="rail" hidden>
     <div class="marca">MetroDecide<span>Verificación de contenido de principio activo por espectroscopía NIR</span></div>
+
+    <div class="sesion" id="sesion">
+      <div>
+        <b id="ses-nombre"></b>
+        <span class="rol" id="ses-rol"></span>
+      </div>
+      <button type="button" id="btn-salir" title="Cerrar sesión">Salir</button>
+    </div>
 
     <nav aria-label="Secciones">
       <a href="#medicion" id="nav-medicion">Medición</a>
+      <a href="#registro" id="nav-registro">Registro y tablero</a>
       <a href="#ficha" id="nav-ficha">Ficha del método</a>
       <a href="#riesgos" id="nav-riesgos">Riesgos de la regla</a>
     </nav>
@@ -231,6 +291,12 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
       <div class="pila" id="sel-modelo" role="group" aria-label="Modelo"></div>
     </div>
 
+    <div class="grupo" id="grupo-regla">
+      <b>Regla de decisión</b>
+      <div class="pila" id="sel-regla" role="group" aria-label="Regla de decisión"></div>
+      <span class="nota-rol" id="nota-regla"></span>
+    </div>
+
     <footer>
       <span id="pie-modelo"></span>
       <button type="button" id="btn-json">Cargar otro JSON del modelo</button>
@@ -240,6 +306,36 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
 
   <main>
     <div id="cargando" class="cargando">Cargando el modelo…</div>
+
+    <!-- ══════════════════ 0. ACCESO ══════════════════ -->
+    <section class="pantalla" id="p-acceso" hidden>
+      <div class="acceso">
+        <div class="acceso-caja">
+          <h1>MetroDecide</h1>
+          <p class="hint">Verificación de contenido de principio activo por espectroscopía NIR</p>
+          <form id="form-acceso" autocomplete="off">
+            <label class="campo">Usuario
+              <input type="text" id="in-usuario" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="campo">Clave
+              <input type="password" id="in-clave" autocomplete="off">
+            </label>
+            <p class="error" id="err-acceso" hidden></p>
+            <button type="submit" class="btn primario ancho">Entrar</button>
+          </form>
+          <div class="demo-cuentas">
+            <b>Acceso simulado para la demostración</b>
+            <p>No hay servidor ni datos personales: los perfiles están escritos en el propio archivo
+               y sirven para mostrar los dos niveles de permiso que pide la norma.</p>
+            <table>
+              <tr><th>Usuario</th><th>Clave</th><th>Perfil</th></tr>
+              <tr><td><code>tecnico</code></td><td><code>1234</code></td><td>Técnico de laboratorio</td></tr>
+              <tr><td><code>gerente</code></td><td><code>1234</code></td><td>Responsable de calidad</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ══════════════════ 1. MEDICIÓN ══════════════════ -->
     <section class="pantalla" id="p-medicion" hidden>
@@ -251,7 +347,12 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
         <label class="campo">Tableta
           <select id="sel-tableta"></select>
         </label>
+        <label class="campo">Lote
+          <input type="text" id="in-lote" maxlength="24" style="min-width:150px">
+        </label>
         <button type="button" class="btn" id="btn-pegar">Pegar un espectro</button>
+        <button type="button" class="btn primario" id="btn-guardar">Guardar en el registro</button>
+        <span class="aviso-guardado" id="aviso-guardado"></span>
       </div>
 
       <div class="tarjeta">
@@ -264,7 +365,7 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
         </div>
         <div class="grafico" id="g-regla" style="margin-top:20px"></div>
         <div class="regla-pie">
-          <span><b>Regla de decisión</b> binaria con banda de guarda, w = U (ILAC-G8 4.2.3)</span>
+          <span><b>Regla de decisión</b> <span id="r-regla"></span></span>
           <span><b>Equipo</b> <span id="r-equipo"></span></span>
           <span><b>Modelo</b> <span id="r-modelo"></span></span>
           <span><b>Tolerancia</b> <span id="r-tol"></span></span>
@@ -273,6 +374,14 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
       </div>
 
       <div id="pasos"></div>
+    </section>
+
+    <!-- ══════════════════ 1b. REGISTRO Y TABLERO ══════════════════ -->
+    <section class="pantalla" id="p-registro" hidden>
+      <div class="cabecera">
+        <h1>Registro y tablero</h1>
+      </div>
+      <div id="registro-cuerpo"></div>
     </section>
 
     <!-- ══════════════════ 2. FICHA ══════════════════ -->
@@ -302,6 +411,30 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
     <div class="dlg-pie">
       <button type="button" class="btn" id="cancelar-pegar">Cancelar</button>
       <button type="button" class="btn primario" id="usar-pegar">Medir este espectro</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-csv">
+  <form class="dlg" method="dialog">
+    <h2 style="font-size:18px; margin-bottom:6px">Exportar el registro</h2>
+    <p class="hint"><span id="nom-csv"></span></p>
+    <textarea id="txt-csv" readonly></textarea>
+    <p class="hint" id="msg-csv" style="margin:7px 0 0"></p>
+    <div class="dlg-pie">
+      <button type="button" class="btn" id="copiar-csv">Copiar</button>
+      <button type="button" class="btn primario" id="cerrar-csv">Cerrar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-confirma">
+  <form class="dlg" method="dialog">
+    <h2 style="font-size:18px; margin-bottom:6px" id="conf-tit"></h2>
+    <p class="hint" id="conf-txt"></p>
+    <div class="dlg-pie">
+      <button type="button" class="btn" id="conf-no">Cancelar</button>
+      <button type="button" class="btn primario" id="conf-si">Confirmar</button>
     </div>
   </form>
 </dialog>
@@ -400,13 +533,20 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
   }
 
   /* Paso 5. Veredicto. AL y AU vienen calculados en el JSON. */
-  function veredicto(x_mg, en_dom, inst) {
+  function veredicto(x_mg, en_dom, AL, AU) {
     if (!en_dom) return "NO EVALUABLE";
-    return (x_mg >= inst.AL && x_mg <= inst.AU) ? "CONFORME" : "NO CONFORME";
+    return (x_mg >= AL && x_mg <= AU) ? "CONFORME" : "NO CONFORME";
+  }
+
+  /* Límites de aceptación según la regla vigente.
+     w = 0 es aceptación simple; w = r*U es banda de guarda (ILAC-G8 4.2.3). */
+  function limites(modelo, inst, regla) {
+    var w = (regla && regla.tipo === "simple") ? 0 : (regla ? regla.r : 1) * inst.U;
+    return {w: w, AL: modelo.tolerancia_mg.TL + w, AU: modelo.tolerancia_mg.TU - w};
   }
 
   /* Los cinco pasos encadenados sobre un espectro crudo de 650 valores. */
-  function medir(espectro, equipo, modelo, F) {
+  function medir(espectro, equipo, modelo, F, regla) {
     var clave = equipo === 1 ? "NIR_1" : "NIR_2";
     var inst = modelo.instrumentos[clave];
     var dom = modelo.dominio[clave];
@@ -420,17 +560,18 @@ dialog textarea{width:100%; min-height:140px; font-family:ui-monospace,Menlo,mon
 
     var p3 = predecir(p1.valores, inst);
     var p4 = dominio(z, dom);
-    var v = veredicto(p3.x_mg, p4.en_dominio, inst);
+    var lim = limites(modelo, inst, regla);
+    var v = veredicto(p3.x_mg, p4.en_dominio, lim.AL, lim.AU);
 
     return {
       equipo: clave, crudo: espectro, snv: p1, z650: z650, z: z, corte: corte,
-      prediccion: p3, dominio: p4, veredicto: v, inst: inst, dom: dom,
+      prediccion: p3, dominio: p4, veredicto: v, inst: inst, dom: dom, lim: lim,
       motivo: p4.en_dominio ? "" :
         (!p4.h_ok && !p4.R_ok ? "leverage+RMSSR" : (!p4.h_ok ? "leverage" : "RMSSR")),
     };
   }
 
-  raiz.CALC = { snv: snv, sgolayfilt: sgolayfilt, predecir: predecir,
+  raiz.CALC = { snv: snv, sgolayfilt: sgolayfilt, predecir: predecir, limites: limites,
                 dominio: dominio, veredicto: veredicto, medir: medir };
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
@@ -452,6 +593,42 @@ var el = function (t, c, h) { var e = document.createElement(t); if (c) e.classN
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]; }); };
 var claveV = function (v) { return "v-" + v.replace(/ /g, ""); };
 
+/* ═══════════════════ sesión, regla y almacenamiento ═══════════════════ */
+var SESION = null, ULTIMA = null;
+var REGLA = {tipo: "guarda", r: 1};
+var REGISTRO = [];
+
+/* Los dos perfiles están escritos aquí a propósito: es un acceso simulado
+   para demostrar los dos niveles de permiso, no un sistema de autenticación. */
+var PERFILES = {
+  tecnico: {clave: "1234", nombre: "Técnico de laboratorio", rol: "tecnico"},
+  gerente: {clave: "1234", nombre: "Responsable de calidad", rol: "gerente"},
+};
+var PERMISOS = {
+  tecnico: ["medicion"],
+  gerente: ["medicion", "registro", "ficha", "riesgos"],
+};
+var puede = function (p) { return !!SESION && PERMISOS[SESION.rol].indexOf(p) >= 0; };
+
+/* localStorage puede fallar o estar bloqueado; nunca debe tumbar la página. */
+function guardar(clave, valor) {
+  try { localStorage.setItem("metrodecide." + clave, JSON.stringify(valor)); return true; }
+  catch (e) { return false; }
+}
+function leer(clave, porDefecto) {
+  try {
+    var v = localStorage.getItem("metrodecide." + clave);
+    return v == null ? porDefecto : JSON.parse(v);
+  } catch (e) { return porDefecto; }
+}
+
+function textoRegla(w) {
+  if (REGLA.tipo === "simple")
+    return "aceptación simple, w = 0 (ILAC-G8 4.2.1)";
+  return "binaria con banda de guarda, w = " + (REGLA.r === 1 ? "U" : REGLA.r + " U") +
+    (w != null ? " = " + fmt(w, 2) + " mg" : "") + " (ILAC-G8 4.2.3)";
+}
+
 /* ═══════════════════════════ gráficos ═══════════════════════════ */
 function svgNS(t, a) {
   var e = document.createElementNS("http://www.w3.org/2000/svg", t);
@@ -467,7 +644,7 @@ function graficoRegla(destino, m, assay) {
   var estrecho = angosta();
   var W = estrecho ? 420 : 900, H = estrecho ? 136 : 128, mL = 18, mR = 18, base = estrecho ? 78 : 74;
   var TL = MODELO.tolerancia_mg.TL, TU = MODELO.tolerancia_mg.TU;
-  var AL = m.inst.AL, AU = m.inst.AU, U = m.inst.U, x = m.prediccion.x_mg;
+  var AL = m.lim.AL, AU = m.lim.AU, U = m.inst.U, x = m.prediccion.x_mg;
   var lo = 150, hi = 245;
   lo = Math.min(lo, x - U - 4); hi = Math.max(hi, x + U + 4);
   var X = function (v) { return mL + (v - lo) / (hi - lo) * (W - mL - mR); };
@@ -624,9 +801,11 @@ function medir() {
     esp = EQUIPO === 1 ? t.e1 : t.e2;
     assay = t.assay; etiq = t.etiquetas;
   }
-  var m = window.CALC.medir(esp, EQUIPO, MODELO, F);
+  var m = window.CALC.medir(esp, EQUIPO, MODELO, F, REGLA);
+  ULTIMA = {m: m, assay: assay, tableta: PEGADO ? "pegada" : D.tabletas[TABLETA].id};
   pintarResultado(m, assay, etiq);
   pintarPasos(m, assay);
+  document.getElementById("aviso-guardado").textContent = "";
 }
 
 function pintarResultado(m, assay, etiq) {
@@ -642,10 +821,11 @@ function pintarResultado(m, assay, etiq) {
   placa.innerHTML = '<span class="v">' + v + "</span>" +
     (glosa ? '<span class="q">' + glosa + "</span>" : "");
 
+  document.getElementById("r-regla").textContent = textoRegla(m.lim.w);
   document.getElementById("r-equipo").textContent = EQUIPO === 1 ? "NIR-1" : "NIR-2";
   document.getElementById("r-modelo").textContent = NOMBRE_MODELO.replace(/_/g, " ");
   document.getElementById("r-tol").textContent = fmt(MODELO.tolerancia_mg.TL,0) + " a " + fmt(MODELO.tolerancia_mg.TU,0) + " mg";
-  document.getElementById("r-acep").textContent = fmt(inst.AL,1) + " a " + fmt(inst.AU,1) + " mg";
+  document.getElementById("r-acep").textContent = fmt(m.lim.AL,1) + " a " + fmt(m.lim.AU,1) + " mg";
 
   graficoRegla(document.getElementById("g-regla"), m, assay);
 }
@@ -819,14 +999,310 @@ function pintarRiesgos() {
 }
 
 /* ═══════════════════════════ armazón ═══════════════════════════ */
-var PANTALLAS = ["medicion", "ficha", "riesgos"];
+/* ═══════════════════════════ registro y tablero ═══════════════════════════ */
+function registrarMedicion(m, datos) {
+  var reg = {
+    id: "M" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    fecha: new Date().toISOString(),
+    usuario: SESION ? SESION.usuario : "",
+    rol: SESION ? SESION.rol : "",
+    lote: datos.lote || "sin lote",
+    tableta: datos.tableta,
+    equipo: m.equipo === "NIR_1" ? "NIR-1" : "NIR-2",
+    modelo: NOMBRE_MODELO,
+    x_mg: Math.round(m.prediccion.x_mg * 1000) / 1000,
+    U: Math.round(m.inst.U * 1000) / 1000,
+    AL: Math.round(m.lim.AL * 1000) / 1000,
+    AU: Math.round(m.lim.AU * 1000) / 1000,
+    regla: REGLA.tipo === "simple" ? "aceptación simple" : "banda de guarda r = " + REGLA.r,
+    w_mg: Math.round(m.lim.w * 1000) / 1000,
+    h: Number(m.dominio.h.toPrecision(6)),
+    RMSSR: Number(m.dominio.RMSSR.toPrecision(6)),
+    en_dominio: m.dominio.en_dominio,
+    veredicto: m.veredicto,
+    referencia_mg: datos.assay == null ? "" : datos.assay,
+  };
+  REGISTRO.push(reg);
+  guardar("registro", REGISTRO);
+  return reg;
+}
+
+/* Caso práctico: mide todas las tabletas de demostración en los dos equipos.
+   Da bastante más de los 20 registros que pide la guía. */
+function sembrarCasoPractico() {
+  var antes = REGISTRO.length;
+  D.tabletas.forEach(function (t) {
+    [1, 2].forEach(function (eq) {
+      var m = window.CALC.medir(eq === 1 ? t.e1 : t.e2, eq, MODELO, F, REGLA);
+      registrarMedicion(m, {lote: "Lote demostración", tableta: t.id, assay: t.assay});
+    });
+  });
+  return REGISTRO.length - antes;
+}
+
+function veredictoLote(filas) {
+  if (filas.some(function (f) { return f.veredicto === "NO CONFORME"; })) return "NO CONFORME";
+  if (filas.some(function (f) { return f.veredicto === "NO EVALUABLE"; })) return "PENDIENTE";
+  return "CONFORME";
+}
+
+function csvRegistro(filas) {
+  var cols = ["fecha", "usuario", "rol", "lote", "tableta", "equipo", "modelo", "regla",
+              "w_mg", "AL", "AU", "x_mg", "U", "h", "RMSSR", "en_dominio", "veredicto",
+              "referencia_mg"];
+  var lineas = [cols.join(";")];
+  filas.forEach(function (f) {
+    lineas.push(cols.map(function (c) {
+      var v = f[c];
+      if (v == null) v = "";
+      if (typeof v === "boolean") v = v ? "sí" : "no";
+      v = String(v);
+      return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(";"));
+  });
+  return lineas.join("\n");
+}
+
+/* Barras agrupadas: veredictos por equipo. */
+function graficoBarras(destino, grupos, series) {
+  var estrecho = angosta();
+  var W = estrecho ? 420 : 620, H = 230, mL = 40, mR = 14, mT = 16, mB = 42;
+  var maxv = 1;
+  grupos.forEach(function (g) { series.forEach(function (s) { maxv = Math.max(maxv, g.valores[s.clave] || 0); }); });
+  var anchoG = (W - mL - mR) / grupos.length;
+  var anchoB = Math.min(46, (anchoG - 16) / series.length);
+  var Y = function (v) { return mT + (1 - v / maxv) * (H - mT - mB); };
+
+  destino.innerHTML = "";
+  var lg = el("div", "leyenda");
+  series.forEach(function (s) {
+    lg.appendChild(el("span", null, '<i style="background:' + s.color + ';height:10px;width:14px"></i>' + esc(s.nombre)));
+  });
+  destino.appendChild(lg);
+
+  var cont = el("div", "grafico");
+  var svg = svgNS("svg", {viewBox: "0 0 " + W + " " + H, role: "img",
+    "aria-label": "Veredictos por equipo"});
+  for (var g = 0; g <= 4; g++) {
+    var yv = maxv * g / 4;
+    svg.appendChild(svgNS("line", {x1: mL, x2: W - mR, y1: Y(yv), y2: Y(yv),
+      stroke: COL.linea, "stroke-width": 1}));
+    var tl = svgNS("text", {x: mL - 7, y: Y(yv) + 3.5, fill: COL.tinta3,
+      "font-size": 10, "text-anchor": "end"});
+    tl.textContent = Math.round(yv); svg.appendChild(tl);
+  }
+  grupos.forEach(function (gr, i) {
+    var x0 = mL + i * anchoG + (anchoG - anchoB * series.length) / 2;
+    series.forEach(function (s, j) {
+      var v = gr.valores[s.clave] || 0;
+      var x = x0 + j * anchoB;
+      if (v > 0) {
+        /* 2 px de separación entre barras vecinas */
+        svg.appendChild(svgNS("rect", {x: x + 1, y: Y(v), width: anchoB - 2,
+          height: H - mB - Y(v), fill: s.color, rx: 3}));
+        var tv = svgNS("text", {x: x + anchoB / 2, y: Y(v) - 5, fill: COL.tinta3,
+          "font-size": 10.5, "font-weight": 600, "text-anchor": "middle"});
+        tv.textContent = v; svg.appendChild(tv);
+      }
+    });
+    var tg = svgNS("text", {x: mL + i * anchoG + anchoG / 2, y: H - mB + 17,
+      fill: COL.tinta3, "font-size": 11.5, "text-anchor": "middle"});
+    tg.textContent = gr.nombre; svg.appendChild(tg);
+  });
+  svg.appendChild(svgNS("line", {x1: mL, x2: W - mR, y1: H - mB, y2: H - mB,
+    stroke: COL.linea, "stroke-width": 1.5}));
+  cont.appendChild(svg); destino.appendChild(cont);
+}
+
+var FILTRO = {equipo: "", veredicto: "", lote: ""};
+
+function pintarRegistro() {
+  var c = document.getElementById("registro-cuerpo");
+  c.innerHTML = "";
+
+  var barra = el("div", "barra-acc");
+  var bSem = el("button", "btn", "Cargar caso práctico");
+  bSem.type = "button";
+  bSem.addEventListener("click", function () {
+    var n = sembrarCasoPractico();
+    pintarRegistro();
+    avisoRegistro("Se agregaron " + n + " mediciones al registro.");
+  });
+  var bCsv = el("button", "btn primario", "Exportar CSV");
+  bCsv.type = "button";
+  bCsv.addEventListener("click", function () { exportarCSV(filtradas()); });
+  var bBorrar = el("button", "btn", "Vaciar registro");
+  bBorrar.type = "button";
+  bBorrar.addEventListener("click", function () {
+    if (!REGISTRO.length) return;
+    abrirConfirma("Vaciar el registro", "Se borran las " + REGISTRO.length +
+      " mediciones guardadas en este navegador. No se puede deshacer.", function () {
+      REGISTRO = []; guardar("registro", REGISTRO); pintarRegistro();
+    });
+  });
+  barra.appendChild(bSem); barra.appendChild(bCsv);
+  barra.appendChild(el("span", "crece"));
+  barra.appendChild(bBorrar);
+  c.appendChild(barra);
+  c.appendChild(el("p", "hint", "El registro se guarda en este navegador y sobrevive al cierre de la página."));
+
+  if (!REGISTRO.length) {
+    var vac = el("div", "tarjeta");
+    vac.appendChild(el("div", "vacio", "Todavía no hay mediciones guardadas.<br>" +
+      "Usá «Cargar caso práctico» o guardá una medición desde la pantalla de Medición."));
+    c.appendChild(vac);
+    return;
+  }
+
+  function filtradas() {
+    return REGISTRO.filter(function (f) {
+      return (!FILTRO.equipo || f.equipo === FILTRO.equipo) &&
+             (!FILTRO.veredicto || f.veredicto === FILTRO.veredicto) &&
+             (!FILTRO.lote || f.lote === FILTRO.lote);
+    });
+  }
+
+  /* resumen */
+  var t0 = el("div", "tarjeta");
+  t0.appendChild(el("h2", null, "Resumen del registro"));
+  var st = el("dl", "stats");
+  function stat(k, v, u) {
+    var d = el("div");
+    d.appendChild(el("dt", null, esc(k)));
+    d.appendChild(el("dd", null, v + (u ? " <small>" + esc(u) + "</small>" : "")));
+    st.appendChild(d);
+  }
+  var cuenta = function (v) { return REGISTRO.filter(function (f) { return f.veredicto === v; }).length; };
+  stat("Mediciones", REGISTRO.length, "");
+  stat("Conformes", cuenta("CONFORME"), "");
+  stat("No conformes", cuenta("NO CONFORME"), "");
+  stat("No evaluables", cuenta("NO EVALUABLE"), "");
+  var lotes = {};
+  REGISTRO.forEach(function (f) { lotes[f.lote] = true; });
+  stat("Lotes", Object.keys(lotes).length, "");
+  t0.appendChild(st);
+  var g = el("div"); g.style.marginTop = "16px";
+  t0.appendChild(g);
+  c.appendChild(t0);
+
+  var series = [
+    {clave: "CONFORME", nombre: "Conforme", color: COL.verde},
+    {clave: "NO CONFORME", nombre: "No conforme", color: COL.rosa},
+    {clave: "NO EVALUABLE", nombre: "No evaluable", color: COL.ocre}];
+  var grupos = ["NIR-1", "NIR-2"].map(function (eq) {
+    var v = {};
+    series.forEach(function (s) {
+      v[s.clave] = REGISTRO.filter(function (f) {
+        return f.equipo === eq && f.veredicto === s.clave; }).length;
+    });
+    return {nombre: eq, valores: v};
+  });
+  graficoBarras(g, grupos, series);
+
+  /* veredicto por lote */
+  var t1 = el("div", "tarjeta");
+  t1.appendChild(el("h2", null, "Veredicto por lote"));
+  Object.keys(lotes).forEach(function (nom) {
+    var filas = REGISTRO.filter(function (f) { return f.lote === nom; });
+    var v = veredictoLote(filas);
+    var f = el("div", "lote-fila");
+    f.appendChild(el("b", null, esc(nom)));
+    f.appendChild(el("span", "chip chip-" + v.replace(/ /g, ""), v));
+    f.appendChild(el("span", "cuenta", filas.length + " mediciones · " +
+      filas.filter(function (x) { return x.veredicto === "CONFORME"; }).length + " conformes · " +
+      filas.filter(function (x) { return x.veredicto === "NO CONFORME"; }).length + " no conformes · " +
+      filas.filter(function (x) { return x.veredicto === "NO EVALUABLE"; }).length + " no evaluables"));
+    t1.appendChild(f);
+  });
+  t1.appendChild(el("p", "hint", "Regla del lote: no conforme si hay al menos una tableta no conforme; " +
+    "pendiente si quedan tabletas no evaluables por resolver en el laboratorio de referencia."));
+  c.appendChild(t1);
+
+  /* tabla con filtros */
+  var t2 = el("div", "tarjeta");
+  t2.appendChild(el("h2", null, "Mediciones"));
+  var fil = el("div", "filtros");
+  function selector(etiqueta, campo, opciones) {
+    var l = el("label", "campo", etiqueta);
+    var s = el("select");
+    s.appendChild(new Option("Todos", ""));
+    opciones.forEach(function (o) { s.appendChild(new Option(o, o)); });
+    s.value = FILTRO[campo];
+    s.addEventListener("change", function () { FILTRO[campo] = this.value; pintarRegistro(); });
+    l.appendChild(s); fil.appendChild(l);
+  }
+  selector("Equipo", "equipo", ["NIR-1", "NIR-2"]);
+  selector("Veredicto", "veredicto", ["CONFORME", "NO CONFORME", "NO EVALUABLE"]);
+  selector("Lote", "lote", Object.keys(lotes));
+  t2.appendChild(fil);
+
+  var vis = filtradas();
+  var ultimas = vis.slice(-200).reverse();
+  var env = tabla(ultimas, [
+    ["fecha", "Fecha", function (v) {
+      return new Date(v).toLocaleString("es-CR", {day: "2-digit", month: "2-digit",
+        hour: "2-digit", minute: "2-digit"});
+    }],
+    ["lote", "Lote"], ["tableta", "Tableta"], ["equipo", "Equipo"],
+    ["x_mg", "Resultado (mg)", function (v) { return fmt(v, 1); }],
+    ["U", "U (mg)", function (v) { return fmt(v, 2); }],
+    ["referencia_mg", "Referencia (mg)", function (v) { return v === "" ? "—" : fmt(v, 1); }],
+    ["veredicto", "Veredicto"], ["usuario", "Usuario"]]);
+  env.className += " alta";
+  t2.appendChild(env);
+  t2.appendChild(el("p", "hint", vis.length > 200
+    ? "Se muestran las 200 más recientes de " + vis.length + " filtradas. El CSV exporta las " + vis.length + "."
+    : "Mostrando " + vis.length + " de " + REGISTRO.length + " mediciones."));
+  c.appendChild(t2);
+}
+
+function avisoRegistro(txt) {
+  var c = document.getElementById("registro-cuerpo");
+  var a = el("div", "aviso", esc(txt));
+  c.insertBefore(a, c.firstChild);
+  setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 4000);
+}
+
+/* Descarga el CSV; si el entorno la bloquea, lo muestra para copiar. */
+function exportarCSV(filas) {
+  var txt = csvRegistro(filas);
+  var nombre = "metrodecide_registro_" + new Date().toISOString().slice(0, 10) + ".csv";
+  var ok = false;
+  try {
+    var blob = new Blob(["﻿" + txt], {type: "text/csv;charset=utf-8;"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = nombre;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    ok = true;
+  } catch (e) { ok = false; }
+  abrirCSV(txt, nombre, ok);
+}
+
+function abrirCSV(txt, nombre, descargado) {
+  var dlg = document.getElementById("dlg-csv");
+  document.getElementById("txt-csv").value = txt;
+  document.getElementById("msg-csv").textContent = descargado
+    ? "Si la descarga no arrancó (algunos visores la bloquean), copiá el contenido desde aquí."
+    : "La descarga directa no está disponible en este visor. Copiá el contenido y pegalo en un archivo .csv";
+  document.getElementById("nom-csv").textContent = nombre;
+  dlg.showModal();
+}
+
+/* ═══════════════════════════ armazón ═══════════════════════════ */
+var PANTALLAS = ["acceso", "medicion", "registro", "ficha", "riesgos"];
 function mostrar(nombre) {
-  if (PANTALLAS.indexOf(nombre) < 0) nombre = "medicion";
+  if (!SESION) nombre = "acceso";
+  else if (nombre === "acceso" || PANTALLAS.indexOf(nombre) < 0 || !puede(nombre)) nombre = "medicion";
   PANTALLAS.forEach(function (p) {
     document.getElementById("p-" + p).hidden = p !== nombre;
     var a = document.getElementById("nav-" + p);
+    if (!a) return;
     if (p === nombre) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
+  if (nombre === "registro") pintarRegistro();
   if (nombre === "ficha") pintarFicha();
   if (nombre === "riesgos") pintarRiesgos();
 }
@@ -867,8 +1343,92 @@ function pintarSelectorTableta() {
 
 function refrescar() {
   if (!document.getElementById("p-medicion").hidden) medir();
+  if (!document.getElementById("p-registro").hidden) pintarRegistro();
   if (!document.getElementById("p-ficha").hidden) pintarFicha();
   if (!document.getElementById("p-riesgos").hidden) pintarRiesgos();
+}
+
+/* ── sesión ── */
+function iniciarSesion(usuario, clave) {
+  var p = PERFILES[String(usuario).trim().toLowerCase()];
+  if (!p || p.clave !== String(clave)) return false;
+  SESION = {usuario: String(usuario).trim().toLowerCase(), nombre: p.nombre, rol: p.rol};
+  guardar("sesion", SESION);
+  aplicarSesion();
+  mostrar("medicion");
+  medir();
+  return true;
+}
+
+function cerrarSesion() {
+  SESION = null;
+  guardar("sesion", null);
+  document.getElementById("in-usuario").value = "";
+  document.getElementById("in-clave").value = "";
+  document.getElementById("err-acceso").hidden = true;
+  aplicarSesion();
+  mostrar("acceso");
+}
+
+/* Muestra u oculta lo que cada perfil puede usar. */
+function aplicarSesion() {
+  var hay = !!SESION;
+  document.getElementById("rail").hidden = !hay;
+  if (hay) {
+    document.getElementById("ses-nombre").textContent = SESION.nombre;
+    document.getElementById("ses-rol").textContent = "sesión de " + SESION.usuario;
+  }
+  ["medicion", "registro", "ficha", "riesgos"].forEach(function (p) {
+    var a = document.getElementById("nav-" + p);
+    if (a) a.hidden = !puede(p);
+  });
+  /* la regla de decisión la fija el responsable de calidad (ISO/IEC 17025 7.1.3) */
+  var esGerente = hay && SESION.rol === "gerente";
+  document.getElementById("grupo-regla").hidden = !hay;
+  document.getElementById("nota-regla").textContent = esGerente
+    ? "La define el responsable de calidad antes de medir."
+    : "La fija el responsable de calidad; el técnico mide con la que esté vigente.";
+  pintarSelectorRegla();
+}
+
+function pintarSelectorRegla() {
+  var cont = document.getElementById("sel-regla");
+  if (!cont) return;
+  var esGerente = SESION && SESION.rol === "gerente";
+  var opciones = [
+    {tipo: "simple", r: 0, et: "Aceptación simple"},
+    {tipo: "guarda", r: 0.5, et: "Banda de guarda r = 0,5"},
+    {tipo: "guarda", r: 1, et: "Banda de guarda r = 1"},
+    {tipo: "guarda", r: 1.5, et: "Banda de guarda r = 1,5"}];
+  cont.innerHTML = "";
+  opciones.forEach(function (o) {
+    var activa = REGLA.tipo === o.tipo && (o.tipo === "simple" || REGLA.r === o.r);
+    if (!esGerente && !activa) return;
+    var b = el("button", null, o.et);
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(activa));
+    b.disabled = !esGerente;
+    if (esGerente) {
+      b.addEventListener("click", function () {
+        REGLA = {tipo: o.tipo, r: o.r};
+        guardar("regla", REGLA);
+        pintarSelectorRegla();
+        refrescar();
+      });
+    }
+    cont.appendChild(b);
+  });
+}
+
+function abrirConfirma(titulo, texto, alAceptar) {
+  var dlg = document.getElementById("dlg-confirma");
+  document.getElementById("conf-tit").textContent = titulo;
+  document.getElementById("conf-txt").textContent = texto;
+  var si = document.getElementById("conf-si");
+  var nuevo = si.cloneNode(true);
+  si.parentNode.replaceChild(nuevo, si);
+  nuevo.addEventListener("click", function () { dlg.close(); alAceptar(); });
+  dlg.showModal();
 }
 
 function arrancar(datos) {
@@ -880,7 +1440,16 @@ function arrancar(datos) {
   document.getElementById("cargando").hidden = !!MODELO;
   conectarCargaJSON();
   if (!MODELO) return;
+
+  REGLA = leer("regla", REGLA);
+  REGISTRO = leer("registro", []);
+  SESION = leer("sesion", null);
+  if (SESION && !PERFILES[SESION.usuario]) SESION = null;
+  document.getElementById("in-lote").value = leer("lote", "Lote A");
+
   pintarSelectorModelo(); pintarPie(); pintarSelectorTableta();
+  conectarAcceso(); conectarRegistro();
+  aplicarSesion();
 
   document.getElementById("sel-equipo").addEventListener("click", function (ev) {
     var b = ev.target.closest("button[data-eq]"); if (!b) return;
@@ -929,8 +1498,49 @@ function arrancar(datos) {
     temporizador = setTimeout(refrescar, 180);
   });
 
-  mostrar(location.hash.slice(1) || "medicion");
-  medir();
+  mostrar(SESION ? (location.hash.slice(1) || "medicion") : "acceso");
+  if (SESION) medir();
+}
+
+/* ── acceso simulado ── */
+function conectarAcceso() {
+  document.getElementById("form-acceso").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var err = document.getElementById("err-acceso");
+    var ok = iniciarSesion(document.getElementById("in-usuario").value,
+                           document.getElementById("in-clave").value);
+    err.hidden = ok;
+    if (!ok) err.textContent = "Usuario o clave incorrectos.";
+  });
+  document.getElementById("btn-salir").addEventListener("click", cerrarSesion);
+}
+
+/* ── guardar mediciones y exportar ── */
+function conectarRegistro() {
+  document.getElementById("in-lote").addEventListener("change", function () {
+    guardar("lote", this.value.trim() || "Lote A");
+  });
+  document.getElementById("btn-guardar").addEventListener("click", function () {
+    if (!ULTIMA) return;
+    var lote = document.getElementById("in-lote").value.trim() || "Lote A";
+    registrarMedicion(ULTIMA.m, {lote: lote, tableta: ULTIMA.tableta, assay: ULTIMA.assay});
+    var av = document.getElementById("aviso-guardado");
+    av.textContent = "Guardada · " + REGISTRO.length + " en el registro";
+    setTimeout(function () { av.textContent = ""; }, 3500);
+  });
+  var dc = document.getElementById("dlg-csv");
+  document.getElementById("cerrar-csv").addEventListener("click", function () { dc.close(); });
+  document.getElementById("copiar-csv").addEventListener("click", function () {
+    var ta = document.getElementById("txt-csv");
+    var b = this;
+    function hecho() { b.textContent = "Copiado"; setTimeout(function () { b.textContent = "Copiar"; }, 2000); }
+    try {
+      navigator.clipboard.writeText(ta.value).then(hecho, function () { ta.select(); });
+    } catch (e) { ta.select(); }
+  });
+  document.getElementById("conf-no").addEventListener("click", function () {
+    document.getElementById("dlg-confirma").close();
+  });
 }
 
 /* El botón de cargar JSON queda conectado incluso si datos.json no llegó. */
